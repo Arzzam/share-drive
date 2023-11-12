@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Easy Share Drive",
+  "version": "1.0.0",
+  "description": "Easy Share Drive",
+  "icons": {
+    "64": "icon.png"
+  },
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["scripting"],
+  "host_permissions": ["https://*/*", "http://*/*"]
+}
