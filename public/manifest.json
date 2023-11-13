@@ -9,6 +9,6 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["scripting"],
+  "permissions": ["scripting", "identity", "identity.email"],
   "host_permissions": ["https://*/*", "http://*/*"]
 }

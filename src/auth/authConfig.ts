@@ -39,9 +39,16 @@ export const msalConfig = {
 };
 
 export const loginRequestScopes = {
-  scopes: ['User.Read', 'Files.ReadWrite', 'Files.Read'],
+  scopes: [
+    'User.Read',
+    'Files.ReadWrite',
+    'Files.Read',
+    'Sites.ReadWrite.All',
+    'Sites.Read.All',
+  ],
 };
 
 export const graphConfig = {
   graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me',
+  driveEndpoint: `https://graph.microsoft.com/v1.0/me/drive/items/root:/`,
 };

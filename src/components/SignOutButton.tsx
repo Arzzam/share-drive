@@ -2,18 +2,19 @@ import { useMsal } from '@azure/msal-react';
 import Button from './Button';
 
 const SignOutButton: React.FC = () => {
-  const { instance } = useMsal();
-
-  const currentActiveAccount = instance.getActiveAccount();
+  const { instance, accounts } = useMsal();
 
   const handleSignOut = () => {
-    instance.logoutPopup({
-      account: currentActiveAccount,
-      logoutHint: currentActiveAccount!.homeAccountId,
-      mainWindowRedirectUri: '/',
-      popupWindowAttributes: { popupSize: { width: 0, height: 0 } },
-      postLogoutRedirectUri: '/',
-    });
+    instance
+      .logoutRedirect({
+        authority: `https://login.microsoftonline.com/${accounts[0]?.tenantId}`,
+        onRedirectNavigate() {
+          return false;
+        },
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   return <Button onClick={handleSignOut}>Sign Out</Button>;

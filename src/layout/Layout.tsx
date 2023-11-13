@@ -14,7 +14,9 @@ const Layout = (props: ILayoutProps) => {
         <h1>Easy Share Drive</h1>
         {isAuthenticated ? <SignOutButton /> : <SignInButton />}
       </nav>
-      <main>{props.children}</main>
+      <main className='flex flex-col justify-center items-center mt-4 h-full'>
+        {props.children}
+      </main>
     </>
   );
 };
