@@ -7,7 +7,7 @@ import { isLargeFile } from '../utils/utils';
 import {
   uploadFileToOneDrive,
   uploadLargeFileToOneDrive,
-} from '../auth/authInfoMsal';
+} from '../utils/uploadUtils';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
@@ -84,7 +84,7 @@ const UploadPage = () => {
 
   return (
     <>
-      <h5 className='card-title'>Welcome {accounts[0].name}</h5>
+      <h5 className='card-title'>Welcome {accounts[0]?.name}</h5>
       <input
         className='w-52'
         type={'file'}
