@@ -3,8 +3,7 @@ import { LogLevel } from '@azure/msal-browser';
 export const msalConfig = {
   auth: {
     clientId: '545f8776-2681-4eef-8c08-4d300cdbec09',
-    authority:
-      'https://login.microsoftonline.com/53fefb03-1f93-413b-b4ee-bd739c961987',
+    authority: 'https://login.microsoftonline.com/common/',
     redirectUri: 'http://localhost:5173',
     postLogoutRedirectUri: 'http://localhost:5173',
     navigateToLoginRequestUrl: true,
@@ -41,8 +40,8 @@ export const msalConfig = {
 export const loginRequestScopes = {
   scopes: [
     'User.Read',
-    'Files.ReadWrite',
-    'Files.Read',
+    'Files.ReadWrite.All',
+    'Files.Read.All',
     'Sites.ReadWrite.All',
     'Sites.Read.All',
   ],
@@ -50,5 +49,6 @@ export const loginRequestScopes = {
 
 export const graphConfig = {
   graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me',
-  driveEndpoint: `https://graph.microsoft.com/v1.0/me/drive/items/root:/`,
+  driveEndpoint: `https://graph.microft.com/v1.0/me/drive/items/root:/`,
+  // driveEndpoint: `https://graph.microft.com/v1.0/me/drive/items/root:/`,
 };
