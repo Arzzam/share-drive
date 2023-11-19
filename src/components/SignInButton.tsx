@@ -6,7 +6,10 @@ const SignInButton: React.FC = () => {
   const { instance } = useMsal();
 
   const handleSignIn = () => {
-    instance.loginRedirect(loginRequestScopes).catch((e) => {
+    // instance.loginRedirect(loginRequestScopes).catch((e) => {
+    //   console.log(e);
+    // });
+    instance.loginPopup(loginRequestScopes).catch((e) => {
       console.log(e);
     });
   };
