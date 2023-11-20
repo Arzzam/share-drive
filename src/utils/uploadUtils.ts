@@ -6,13 +6,13 @@ export const uploadFileToOneDrive = async (
 ): Promise<string> => {
   const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${file.name}:/content`;
   try {
-    console.log('file', file);
-    await axios.put(endpoint, file, {
+    const uploadResponse = await axios.put(endpoint, file, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': file?.type,
       },
     });
+    console.log(uploadResponse);
     return 'File Uploaded Successfully';
   } catch (error) {
     console.error(error);
@@ -39,12 +39,12 @@ export const uploadLargeFileToOneDrive = async (
     const chunkSize = 3 * 1024 * 1024; // 4 MB
     let start = 0;
     let end = Math.min(chunkSize, fileSize);
-
+    let uploadResponse;
     while (start < fileSize) {
       const chunk = file.slice(start, end);
       const range = `bytes ${start}-${end - 1}/${fileSize}`;
 
-      await axios.put(uploadUrl, chunk, {
+      uploadResponse = await axios.put(uploadUrl, chunk, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Range': range,
@@ -54,6 +54,7 @@ export const uploadLargeFileToOneDrive = async (
       start = end;
       end = Math.min(start + chunkSize, fileSize);
     }
+    console.log(uploadResponse);
     return 'File Uploaded Successfully';
   } catch (error) {
     console.error(error);
