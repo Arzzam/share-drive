@@ -11,7 +11,7 @@ const Layout = (props: ILayoutProps) => {
   return (
     <>
       <nav className='flex flex-row justify-between w-full'>
-        <h1 className='self-center'>Easy Share Drive</h1>
+        <h1 className='self-center font-semibold text-lg'>Easy Share Drive</h1>
         {isAuthenticated ? <SignOutButton /> : <SignInButton />}
       </nav>
       <main className='flex flex-col justify-center items-center mt-4 h-full'>

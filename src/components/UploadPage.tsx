@@ -8,11 +8,26 @@ import {
   uploadFileToOneDrive,
   uploadLargeFileToOneDrive,
 } from '../utils/uploadUtils';
+import Button from './Button';
+import LoadingButton from './LoadingButton';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import FileInput from './FileInput';
+import Input from './Input';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
   const [file, setFile] = useState<File>();
   const [token, setToken] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const toastResponse = (response: string) => {
+    toast(response, {
+      autoClose: 5000,
+      type: 'success',
+      position: 'top-right',
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) setFile(e.target.files[0]);
@@ -45,16 +60,15 @@ const UploadPage = () => {
         if (response) {
           setToken(response.accessToken);
         }
-        console.log('RESPONSE IN UPLOAD PAGE ', response);
       });
     const endpoint = `https://graph.microsoft.com/v1.0/me/drive/root/children`;
     try {
-      console.log('token', token);
-      await axios.get(endpoint, {
+      const response = await axios.get(endpoint, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log('OneDrive Response ', response);
     } catch (error) {
       console.error(error);
     }
@@ -73,26 +87,41 @@ const UploadPage = () => {
       });
     if (file && token) {
       if (file && isLargeFile(file?.size)) {
+        setIsLoading(true);
         const response = await uploadLargeFileToOneDrive(file, token);
-        alert(response);
+        if (response) {
+          toastResponse(response);
+          setIsLoading(false);
+          setFile(undefined);
+        }
       } else {
+        setIsLoading(true);
         const response = await uploadFileToOneDrive(file, token);
-        alert(response);
+        if (response) {
+          toastResponse(response);
+          setIsLoading(false);
+        }
       }
     }
   };
 
   return (
     <>
-      <h5 className='card-title'>Welcome {accounts[0]?.name}</h5>
-      <input
-        className='w-52'
-        type={'file'}
-        onChange={(e) => handleFileChange(e)}
-      />
-      <button onClick={handleUploadFile}>Upload a File</button>
-      <button onClick={callUserInfo}>GEt Info</button>
-      <button onClick={getFileInfo}>GEt File</button>
+      <h5 className='font-normal text-xl self-start'>
+        Welcome <span className='font-bold'>{accounts[0]?.name}</span>
+      </h5>
+      <div className='flex flex-col justify-center items-center gap-2'>
+        <ToastContainer />
+        <Input label='File Path' placeholder='Enter the file Path to upload' />
+        <FileInput onChange={(e) => handleFileChange(e)} />
+        {isLoading ? (
+          <LoadingButton />
+        ) : (
+          <Button onClick={handleUploadFile}>Upload a File</Button>
+        )}
+        <Button onClick={callUserInfo}>Get Info</Button>
+        <Button onClick={getFileInfo}>Get File</Button>
+      </div>
     </>
   );
 };
