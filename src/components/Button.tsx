@@ -5,7 +5,7 @@ interface IButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = (props: IButtonProps) => {
   return (
     <button
-      className={` text-white bg-[#4681f4] py-2 px-4 rounded-2xl ${
+      className={`py-2.5 px-5 me-2 text-sm font-medium rounded-xl border text-white bg-blue-600 hover:bg-blue-800 ${
         props.className ? props.className : ''
       }`}
       onClick={props.onClick}
