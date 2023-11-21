@@ -127,13 +127,18 @@ const UploadPage = () => {
       <h5 className='font-normal text-xl self-start'>
         Welcome <span className='font-bold'>{accounts[0]?.name}</span>
       </h5>
-      <div className='flex flex-col justify-center items-center gap-2'>
+      <div className='flex flex-col justify-center items-center gap-2 w-[50vw]'>
         <ToastContainer />
-        <Input label='File Path' placeholder='Enter the file Path to upload' />
-        <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
+        <div className='flex flex-row justify-between items-center w-full gap-10'>
+          <Input
+            label='File Path'
+            placeholder='Enter the file Path to upload'
+          />
+          <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
+        </div>
         {files && files?.length > 0 && (
           <>
-            <h3 className='text-lg font-medium self-start'>Files to Upload</h3>
+            <h3 className='text-lg font-medium'>Files to Upload</h3>
             <div className='flex flex-col gap-2'>
               {Array.from(files).map((file) => (
                 <p key={file.name}>{file.name}</p>

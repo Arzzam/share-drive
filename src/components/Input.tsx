@@ -5,7 +5,7 @@ interface IInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Input = (props: IInputProps) => {
   return (
-    <>
+    <div className='flex w-full flex-col gap-1'>
       <label
         htmlFor='default-input'
         className='block text-sm font-medium text-gray-900 '
@@ -15,11 +15,11 @@ const Input = (props: IInputProps) => {
       <input
         type='text'
         id='default-input'
-        className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+        className='bg-gray-50 border border-gray-300 h-11 text-gray-900 text-sm rounded-lg focus:border-gray-400 focus:ring-gray-400 block w-full p-2.5'
         placeholder={props.placeholder}
         {...props}
       />
-    </>
+    </div>
   );
 };
 
