@@ -17,7 +17,7 @@ import Input from './Input';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
-  const [file, setFile] = useState<File>();
+  const [files, setFiles] = useState<FileList | null>(null); // [File, File, File
   const [token, setToken] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -29,8 +29,22 @@ const UploadPage = () => {
     });
   };
 
+  const clearFileInputs = () => {
+    setFiles(null);
+    const fileInput = document.getElementById(
+      'files-upload'
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) setFile(e.target.files[0]);
+    const fileValue = e.target.files;
+    console.log('File Value ', fileValue);
+    if (fileValue) {
+      setFiles(fileValue);
+    }
   };
 
   const callUserInfo = async () => {
@@ -85,22 +99,25 @@ const UploadPage = () => {
           setToken(response.accessToken);
         }
       });
-    if (file && token) {
-      if (file && isLargeFile(file?.size)) {
-        setIsLoading(true);
-        const response = await uploadLargeFileToOneDrive(file, token);
-        if (response) {
-          toastResponse(response);
-          setIsLoading(false);
-          setFile(undefined);
+    if (files && token) {
+      if (files?.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          setIsLoading(true);
+          if (isLargeFile(files[i]?.size)) {
+            const response = await uploadLargeFileToOneDrive(files[i], token);
+            if (response) {
+              toastResponse(response);
+            }
+          } else {
+            const response = await uploadFileToOneDrive(files[i], token);
+            if (response) {
+              toastResponse(response);
+              setIsLoading(false);
+            }
+          }
         }
-      } else {
-        setIsLoading(true);
-        const response = await uploadFileToOneDrive(file, token);
-        if (response) {
-          toastResponse(response);
-          setIsLoading(false);
-        }
+        clearFileInputs();
+        setIsLoading(false);
       }
     }
   };
@@ -113,7 +130,17 @@ const UploadPage = () => {
       <div className='flex flex-col justify-center items-center gap-2'>
         <ToastContainer />
         <Input label='File Path' placeholder='Enter the file Path to upload' />
-        <FileInput onChange={(e) => handleFileChange(e)} />
+        <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
+        {files && files?.length > 0 && (
+          <>
+            <h3 className='text-lg font-medium self-start'>Files to Upload</h3>
+            <div className='flex flex-col gap-2'>
+              {Array.from(files).map((file) => (
+                <p key={file.name}>{file.name}</p>
+              ))}
+            </div>
+          </>
+        )}
         {isLoading ? (
           <LoadingButton />
         ) : (
