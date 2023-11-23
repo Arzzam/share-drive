@@ -1,4 +1,5 @@
 import axios from 'axios';
+// import { graphConfig } from '../api/graphCall';
 
 export const uploadFileToOneDrive = async (
   file: File,
@@ -36,7 +37,7 @@ export const uploadLargeFileToOneDrive = async (
     const uploadUrl = sessionResponse.data.uploadUrl;
     const fileSize = file.size;
 
-    const chunkSize = 3 * 1024 * 1024; // 4 MB
+    const chunkSize = 3 * 1024 * 1024; // 3 MB
     let start = 0;
     let end = Math.min(chunkSize, fileSize);
     let uploadResponse;

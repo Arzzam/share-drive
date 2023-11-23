@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMsal } from '@azure/msal-react';
 import { loginRequestScopes } from '../auth/authConfig';
 import axios from 'axios';
-import { callMsGraph } from '../auth/graphCall';
+import { callMsGraph } from '../api/graphCall';
 import { isLargeFile } from '../utils/utils';
 import {
   uploadFileToOneDrive,
@@ -127,7 +127,7 @@ const UploadPage = () => {
       <h5 className='font-normal text-xl self-start'>
         Welcome <span className='font-bold'>{accounts[0]?.name}</span>
       </h5>
-      <div className='flex flex-col justify-center items-center gap-2 w-[50vw]'>
+      <div className='flex flex-col justify-center items-center gap-2 w-[70%]'>
         <ToastContainer />
         <div className='flex flex-row justify-between items-center w-full gap-10'>
           <Input
@@ -135,6 +135,13 @@ const UploadPage = () => {
             placeholder='Enter the file Path to upload'
           />
           <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
+          {isLoading ? (
+            <LoadingButton />
+          ) : (
+            <Button className='w-80 self-end mb-1' onClick={handleUploadFile}>
+              Upload a File
+            </Button>
+          )}
         </div>
         {files && files?.length > 0 && (
           <>
@@ -146,13 +153,9 @@ const UploadPage = () => {
             </div>
           </>
         )}
-        {isLoading ? (
-          <LoadingButton />
-        ) : (
-          <Button onClick={handleUploadFile}>Upload a File</Button>
-        )}
-        <Button onClick={callUserInfo}>Get Info</Button>
-        <Button onClick={getFileInfo}>Get File</Button>
+
+        {/* <Button onClick={callUserInfo}>Get Info</Button>
+        <Button onClick={getFileInfo}>Get File</Button> */}
       </div>
     </>
   );

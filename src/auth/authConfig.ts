@@ -1,8 +1,9 @@
 import { LogLevel } from '@azure/msal-browser';
 
+console.log(import.meta.env.VITE_CLIENT_ID);
 export const msalConfig = {
   auth: {
-    clientId: '545f8776-2681-4eef-8c08-4d300cdbec09',
+    clientId: import.meta.env.VITE_CLIENT_ID,
     authority: 'https://login.microsoftonline.com/common/',
     redirectUri: '/',
     postLogoutRedirectUri: '/',
@@ -45,10 +46,4 @@ export const loginRequestScopes = {
     'Sites.ReadWrite.All',
     'Sites.Read.All',
   ],
-};
-
-export const graphConfig = {
-  graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me',
-  driveEndpoint: `https://graph.microft.com/v1.0/me/drive/items/root:/`,
-  // driveEndpoint: `https://graph.microft.com/v1.0/me/drive/items/root:/`,
 };
