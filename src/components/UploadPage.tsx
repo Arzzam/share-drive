@@ -11,6 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FileInput from './FileInput';
 import Input from './Input';
+import { loginRequestScopes } from '../auth/authConfig';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
