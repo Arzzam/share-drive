@@ -1,8 +1,5 @@
 import { useState } from 'react';
 import { useMsal } from '@azure/msal-react';
-import { loginRequestScopes } from '../auth/authConfig';
-import axios from 'axios';
-import { callMsGraph } from '../api/graphCall';
 import { isLargeFile } from '../utils/utils';
 import {
   uploadFileToOneDrive,
@@ -18,6 +15,7 @@ import Input from './Input';
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
   const [files, setFiles] = useState<FileList | null>(null); // [File, File, File
+  const [filePath, setFilePath] = useState<string>('');
   const [token, setToken] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -47,45 +45,9 @@ const UploadPage = () => {
     }
   };
 
-  const callUserInfo = async () => {
-    instance
-      .acquireTokenSilent({
-        ...loginRequestScopes,
-        account: accounts[0],
-      })
-      .then((response) => {
-        if (response) {
-          callMsGraph(response.accessToken).then((response) => {
-            console.log('Response  ', response);
-          });
-          setToken(response.accessToken);
-        }
-        console.log('Response  ', response);
-      });
-  };
-
-  const getFileInfo = async () => {
-    instance
-      .acquireTokenSilent({
-        ...loginRequestScopes,
-        account: accounts[0],
-      })
-      .then((response) => {
-        if (response) {
-          setToken(response.accessToken);
-        }
-      });
-    const endpoint = `https://graph.microsoft.com/v1.0/me/drive/root/children`;
-    try {
-      const response = await axios.get(endpoint, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log('OneDrive Response ', response);
-    } catch (error) {
-      console.error(error);
-    }
+  const handlePathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pathValue = e.target.value;
+    setFilePath(pathValue);
   };
 
   const handleUploadFile = async () => {
@@ -104,15 +66,22 @@ const UploadPage = () => {
         for (let i = 0; i < files.length; i++) {
           setIsLoading(true);
           if (isLargeFile(files[i]?.size)) {
-            const response = await uploadLargeFileToOneDrive(files[i], token);
+            const response = await uploadLargeFileToOneDrive(
+              files[i],
+              token,
+              filePath
+            );
             if (response) {
               toastResponse(response);
             }
           } else {
-            const response = await uploadFileToOneDrive(files[i], token);
+            const response = await uploadFileToOneDrive(
+              files[i],
+              token,
+              filePath
+            );
             if (response) {
               toastResponse(response);
-              setIsLoading(false);
             }
           }
         }
@@ -129,29 +98,30 @@ const UploadPage = () => {
       </h5>
       <div className='flex flex-col justify-center items-center gap-2 w-[70%]'>
         <ToastContainer />
-        <div className='flex flex-row justify-between items-center w-full gap-10'>
+        <div className='flex flex-row justify-between items-center w-[80%] gap-10'>
+          <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
           <Input
             label='File Path'
             placeholder='Enter the file Path to upload'
+            onChange={(e) => handlePathChange(e)}
           />
-          <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
-          {isLoading ? (
-            <LoadingButton />
-          ) : (
-            <Button className='w-80 self-end mb-1' onClick={handleUploadFile}>
-              Upload a File
-            </Button>
-          )}
         </div>
+        {isLoading ? (
+          <LoadingButton />
+        ) : (
+          <Button className='self-center mb-1' onClick={handleUploadFile}>
+            Upload a File
+          </Button>
+        )}
         {files && files?.length > 0 && (
-          <>
+          <div className='flex flex-col justify-start items-start w-full'>
             <h3 className='text-lg font-medium'>Files to Upload</h3>
-            <div className='flex flex-col gap-2'>
-              {Array.from(files).map((file) => (
-                <p key={file.name}>{file.name}</p>
+            <div className='flex flex-col gap-2 w-full'>
+              {Array.from(files).map((file, idx) => (
+                <p key={file.name}>{idx + 1 + '. ' + file.name}</p>
               ))}
             </div>
-          </>
+          </div>
         )}
 
         {/* <Button onClick={callUserInfo}>Get Info</Button>

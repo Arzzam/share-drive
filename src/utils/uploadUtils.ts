@@ -3,9 +3,11 @@ import axios from 'axios';
 
 export const uploadFileToOneDrive = async (
   file: File,
-  token: string | undefined
+  token: string | undefined,
+  filePath: string
 ): Promise<string> => {
-  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${file.name}:/content`;
+  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${filePath}/${file.name}:/content`;
+  console.log(endpoint);
   try {
     const uploadResponse = await axios.put(endpoint, file, {
       headers: {
@@ -23,9 +25,11 @@ export const uploadFileToOneDrive = async (
 
 export const uploadLargeFileToOneDrive = async (
   file: File,
-  token: string | undefined
+  token: string | undefined,
+  filePath: string
 ): Promise<string> => {
-  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${file.name}:/createUploadSession`;
+  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${filePath}/${file.name}:/createUploadSession`;
+  console.log(endpoint);
   try {
     const sessionResponse = await axios.post(endpoint, null, {
       headers: {
