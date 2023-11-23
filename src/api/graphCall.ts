@@ -1,4 +1,7 @@
-import { graphConfig } from './authConfig';
+export const graphConfig = {
+  graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me',
+  driveEndpoint: `https://graph.microft.com/v1.0/me/drive/items/root:/`,
+};
 
 export async function callMsGraph(accessToken: string) {
   const headers = new Headers();

@@ -5,7 +5,7 @@ export const getAccessToken = async (
   instance: IPublicClientApplication,
   accounts: AccountInfo
 ) => {
-  instance
+  return instance
     .acquireTokenSilent({
       ...loginRequestScopes,
       account: accounts,
@@ -16,5 +16,4 @@ export const getAccessToken = async (
     .catch((error) => {
       console.log(error);
     });
-  return '';
 };
