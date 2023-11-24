@@ -1,4 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { toast } from 'react-toastify';
+import { CHUNK_SIZE, toastConfig } from './utils';
 // import { graphConfig } from '../api/graphCall';
 
 export const uploadFileToOneDrive = async (
@@ -6,8 +8,9 @@ export const uploadFileToOneDrive = async (
   token: string | undefined,
   filePath: string
 ): Promise<string> => {
-  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${filePath}/${file.name}:/content`;
-  console.log(endpoint);
+  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${
+    filePath ? filePath + '/' : ''
+  }${file.name}:/content`;
   try {
     const uploadResponse = await axios.put(endpoint, file, {
       headers: {
@@ -15,11 +18,12 @@ export const uploadFileToOneDrive = async (
         'Content-Type': file?.type,
       },
     });
-    console.log(uploadResponse);
-    return 'File Uploaded Successfully';
+    toast.success('File uploaded successfully', toastConfig);
+    return await getShareableLink(uploadResponse, token);
   } catch (error) {
     console.error(error);
-    return 'Error Uploading File';
+    toast.error('Error uploading file', toastConfig);
+    return Promise.reject(error);
   }
 };
 
@@ -28,7 +32,9 @@ export const uploadLargeFileToOneDrive = async (
   token: string | undefined,
   filePath: string
 ): Promise<string> => {
-  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${filePath}/${file.name}:/createUploadSession`;
+  const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${
+    filePath ? filePath + '/' : ''
+  }${file.name}:/createUploadSession`;
   console.log(endpoint);
   try {
     const sessionResponse = await axios.post(endpoint, null, {
@@ -41,10 +47,10 @@ export const uploadLargeFileToOneDrive = async (
     const uploadUrl = sessionResponse.data.uploadUrl;
     const fileSize = file.size;
 
-    const chunkSize = 3 * 1024 * 1024; // 3 MB
     let start = 0;
-    let end = Math.min(chunkSize, fileSize);
-    let uploadResponse;
+    let end = Math.min(CHUNK_SIZE, fileSize);
+    let uploadResponse: AxiosResponse | undefined;
+
     while (start < fileSize) {
       const chunk = file.slice(start, end);
       const range = `bytes ${start}-${end - 1}/${fileSize}`;
@@ -57,12 +63,50 @@ export const uploadLargeFileToOneDrive = async (
       });
 
       start = end;
-      end = Math.min(start + chunkSize, fileSize);
+      end = Math.min(start + CHUNK_SIZE, fileSize);
     }
-    console.log(uploadResponse);
-    return 'File Uploaded Successfully';
-  } catch (error) {
+    toast.success('File uploaded successfully', toastConfig);
+    return await getShareableLink(uploadResponse, token);
+  } catch (e) {
+    const error = e as AxiosError;
     console.error(error);
-    return 'Error Uploading File';
+    toast.error('Error uploading file', toastConfig);
+    return Promise.reject(error);
   }
+};
+
+// const handleAxiosError = (error: AxiosError) => {
+//   if (error.response) {
+//     console.log(error.response.data);
+//     console.log(error.response.status);
+//     console.log(error.response.headers);
+//     return error.response;
+//   } else if (error.request) {
+//     console.log(error.request);
+//     return error.request;
+//   } else {
+//     console.log('Error', error.message);
+//     return error.message;
+//   }
+// };
+
+const getShareableLink = async (
+  uploadResponse: AxiosResponse | undefined,
+  token: string | undefined
+) => {
+  if (!uploadResponse || !token) return '';
+  const createLinkUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${uploadResponse.data.id}/createLink`;
+  const payload = {
+    type: 'view', // or 'edit' for edit access
+    scope: 'anonymous',
+  };
+
+  const urlResponse = await axios.post(createLinkUrl, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const shareableLink: string = urlResponse.data.link.webUrl;
+
+  return shareableLink;
 };
