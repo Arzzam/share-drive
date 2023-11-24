@@ -5,45 +5,24 @@ import {
   uploadFileToOneDrive,
   uploadLargeFileToOneDrive,
 } from '../utils/uploadUtils';
-import Button from './Button';
-import LoadingButton from './LoadingButton';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import FileInput from './FileInput';
-import Input from './Input';
 import { loginRequestScopes } from '../auth/authConfig';
+import Button from './Button';
+import Input from './Input';
+import DragAndDrop from './DragDropFile';
+import LoadingButton from './LoadingButton';
+import { IFileInput } from '../utils/types';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
-  const [files, setFiles] = useState<FileList | null>(null); // [File, File, File
+  const [files, setFiles] = useState<IFileInput[]>([]);
   const [filePath, setFilePath] = useState<string>('');
   const [token, setToken] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const toastResponse = (response: string) => {
-    toast(response, {
-      autoClose: 5000,
-      type: 'success',
-      position: 'top-right',
-    });
-  };
-
   const clearFileInputs = () => {
-    setFiles(null);
-    const fileInput = document.getElementById(
-      'files-upload'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileValue = e.target.files;
-    console.log('File Value ', fileValue);
-    if (fileValue) {
-      setFiles(fileValue);
-    }
+    setFiles([]);
   };
 
   const handlePathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,22 +46,22 @@ const UploadPage = () => {
         for (let i = 0; i < files.length; i++) {
           setIsLoading(true);
           if (isLargeFile(files[i]?.size)) {
-            const response = await uploadLargeFileToOneDrive(
+            const responseLink = await uploadLargeFileToOneDrive(
               files[i],
               token,
               filePath
             );
-            if (response) {
-              toastResponse(response);
+            if (responseLink) {
+              console.log('Link', responseLink);
             }
           } else {
-            const response = await uploadFileToOneDrive(
+            const responseLink = await uploadFileToOneDrive(
               files[i],
               token,
               filePath
             );
-            if (response) {
-              toastResponse(response);
+            if (responseLink) {
+              console.log('Link', responseLink);
             }
           }
         }
@@ -94,39 +73,31 @@ const UploadPage = () => {
 
   return (
     <>
+      <ToastContainer />
       <h5 className='font-normal text-xl self-start'>
         Welcome <span className='font-bold'>{accounts[0]?.name}</span>
       </h5>
-      <div className='flex flex-col justify-center items-center gap-2 w-[70%]'>
-        <ToastContainer />
-        <div className='flex flex-row justify-between items-center w-[80%] gap-10'>
-          <FileInput onChange={(e) => handleFileChange(e)} id='files-upload' />
+      <div className='flex flex-row justify-center mt-4 items-center gap-10 w-[80%]'>
+        <DragAndDrop
+          className='w-[30%] max-h-[60vh] overflow-auto pr-3'
+          setFiles={setFiles}
+          files={files}
+        />
+
+        <div className='w-[30%] flex flex-col gap-2 self-start h-full'>
           <Input
             label='File Path'
             placeholder='Enter the file Path to upload'
             onChange={(e) => handlePathChange(e)}
           />
+          {isLoading ? (
+            <LoadingButton />
+          ) : (
+            <Button className='self-center mb-1' onClick={handleUploadFile}>
+              Upload a File
+            </Button>
+          )}
         </div>
-        {isLoading ? (
-          <LoadingButton />
-        ) : (
-          <Button className='self-center mb-1' onClick={handleUploadFile}>
-            Upload a File
-          </Button>
-        )}
-        {files && files?.length > 0 && (
-          <div className='flex flex-col justify-start items-start w-full'>
-            <h3 className='text-lg font-medium'>Files to Upload</h3>
-            <div className='flex flex-col gap-2 w-full'>
-              {Array.from(files).map((file, idx) => (
-                <p key={file.name}>{idx + 1 + '. ' + file.name}</p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* <Button onClick={callUserInfo}>Get Info</Button>
-        <Button onClick={getFileInfo}>Get File</Button> */}
       </div>
     </>
   );

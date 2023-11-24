@@ -1,84 +1,49 @@
-// import React from 'react';
+import { CloudUploadOutlined } from '@ant-design/icons';
+import { Upload, UploadFile } from 'antd';
+import { IFileInput } from './UploadPage';
 
-// function handleFile(files) {
-//   alert('Number of files: ' + files.length);
-// }
+const { Dragger } = Upload;
 
-// // drag drop file component
-// function DragDropFile() {
-//   // drag state
-//   const [dragActive, setDragActive] = React.useState(false);
-//   // ref
-//   const inputRef = React.useRef(null);
+interface IDragAndDropProps {
+  files: IFileInput[];
+  setFiles: React.Dispatch<React.SetStateAction<IFileInput[]>>;
+  className?: string;
+}
 
-//   // handle drag events
-//   const handleDrag = function (e) {
-//     e.preventDefault();
-//     e.stopPropagation();
-//     if (e.type === 'dragenter' || e.type === 'dragover') {
-//       setDragActive(true);
-//     } else if (e.type === 'dragleave') {
-//       setDragActive(false);
-//     }
-//   };
+const DragAndDrop = (props: IDragAndDropProps) => {
+  const beforeUpload = (file: IFileInput) => {
+    props.setFiles((prevFiles) => [...prevFiles, file]);
+    return false;
+  };
 
-//   // triggers when file is dropped
-//   const handleDrop = function (e) {
-//     e.preventDefault();
-//     e.stopPropagation();
-//     setDragActive(false);
-//     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-//       handleFile(e.dataTransfer.files);
-//     }
-//   };
+  const onRemove = (file: UploadFile) => {
+    props.setFiles((prevFiles) =>
+      prevFiles?.filter((prevFile) => prevFile.uid !== file.uid)
+    );
+  };
 
-//   // triggers when file is selected with click
-//   const handleChange = function (e) {
-//     e.preventDefault();
-//     if (e.target.files && e.target.files[0]) {
-//       handleFile(e.target.files);
-//     }
-//   };
+  return (
+    <>
+      <Dragger
+        className={`${props.className ? props.className : ''}`}
+        fileList={props.files.map((file) => ({
+          uid: file.uid,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        }))}
+        multiple
+        beforeUpload={beforeUpload}
+        onRemove={onRemove}
+        showUploadList={{ showRemoveIcon: true }}
+      >
+        <p className='ant-upload-drag-icon'>
+          <CloudUploadOutlined />
+        </p>
+        <p className='ant-upload-text p-2'>Click or drag file to upload</p>
+      </Dragger>
+    </>
+  );
+};
 
-//   // triggers the input when the button is clicked
-//   const onButtonClick = () => {
-//     inputRef.current.click();
-//   };
-
-//   return (
-//     <form
-//       id='form-file-upload'
-//       onDragEnter={handleDrag}
-//       onSubmit={(e) => e.preventDefault()}
-//     >
-//       <input
-//         ref={inputRef}
-//         type='file'
-//         id='input-file-upload'
-//         multiple={true}
-//         onChange={handleChange}
-//       />
-//       <label
-//         id='label-file-upload'
-//         htmlFor='input-file-upload'
-//         className={dragActive ? 'drag-active' : ''}
-//       >
-//         <div>
-//           <p>Drag and drop your file here or</p>
-//           <button className='upload-button' onClick={onButtonClick}>
-//             Upload a file
-//           </button>
-//         </div>
-//       </label>
-//       {dragActive && (
-//         <div
-//           id='drag-file-element'
-//           onDragEnter={handleDrag}
-//           onDragLeave={handleDrag}
-//           onDragOver={handleDrag}
-//           onDrop={handleDrop}
-//         ></div>
-//       )}
-//     </form>
-//   );
-// }
+export default DragAndDrop;
