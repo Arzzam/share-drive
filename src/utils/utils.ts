@@ -28,3 +28,8 @@ export const toastConfig = {
 };
 
 export const CHUNK_SIZE = 3 * 1024 * 1024;
+
+export const linkConfigPayload = {
+  type: 'view', // or 'edit' for edit access
+  scope: 'anonymous',
+};

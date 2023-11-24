@@ -10,3 +10,14 @@ export interface IUploadFileResponse {
 export interface IFileInput extends File {
   uid: string;
 }
+
+export enum FileType {
+  File = 'File',
+  Folder = 'Folder',
+}
+
+export interface IUploadLinkResponse {
+  name: string;
+  link: string;
+  type: FileType.File | FileType.Folder;
+}

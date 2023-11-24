@@ -1,18 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMsal } from '@azure/msal-react';
-import { isLargeFile } from '../utils/utils';
-import {
-  uploadFileToOneDrive,
-  uploadLargeFileToOneDrive,
-} from '../utils/uploadUtils';
+
 import { loginRequestScopes } from '../auth/authConfig';
 import Button from './Button';
 import Input from './Input';
 import DragAndDrop from './DragDropFile';
 import LoadingButton from './LoadingButton';
 import { IFileInput } from '../utils/types';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { uploadFileToOneDrive } from '../api/graphCall';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
@@ -30,7 +27,7 @@ const UploadPage = () => {
     setFilePath(pathValue);
   };
 
-  const handleUploadFile = async () => {
+  const fetchAccessToken = async () => {
     instance
       .acquireTokenSilent({
         ...loginRequestScopes,
@@ -41,33 +38,26 @@ const UploadPage = () => {
           setToken(response.accessToken);
         }
       });
-    if (files && token) {
-      if (files?.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          setIsLoading(true);
-          if (isLargeFile(files[i]?.size)) {
-            const responseLink = await uploadLargeFileToOneDrive(
-              files[i],
-              token,
-              filePath
-            );
-            if (responseLink) {
-              console.log('Link', responseLink);
-            }
-          } else {
-            const responseLink = await uploadFileToOneDrive(
-              files[i],
-              token,
-              filePath
-            );
-            if (responseLink) {
-              console.log('Link', responseLink);
-            }
-          }
-        }
+  };
+
+  useEffect(() => {
+    fetchAccessToken();
+  }, [accounts]);
+
+  const handleUploadFile = async () => {
+    try {
+      if (files.length > 0 && token) {
+        setIsLoading(true);
+        const response = await uploadFileToOneDrive(files, token, filePath);
+        console.log(response);
         clearFileInputs();
-        setIsLoading(false);
+      } else {
+        toast.error('Please select a file to upload');
       }
+    } catch (error) {
+      toast.error('An error occurred during file upload');
+    } finally {
+      setIsLoading(false);
     }
   };
 

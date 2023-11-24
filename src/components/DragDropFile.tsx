@@ -1,6 +1,6 @@
 import { CloudUploadOutlined } from '@ant-design/icons';
 import { Upload, UploadFile } from 'antd';
-import { IFileInput } from './UploadPage';
+import { IFileInput } from '../utils/types';
 
 const { Dragger } = Upload;
 
