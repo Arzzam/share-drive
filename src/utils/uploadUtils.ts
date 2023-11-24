@@ -35,7 +35,6 @@ export const uploadLargeFileToOneDrive = async (
   const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/root:/${
     filePath ? filePath + '/' : ''
   }${file.name}:/createUploadSession`;
-  console.log(endpoint);
   try {
     const sessionResponse = await axios.post(endpoint, null, {
       headers: {
@@ -90,10 +89,10 @@ export const uploadLargeFileToOneDrive = async (
 //   }
 // };
 
-const getShareableLink = async (
+export const getShareableLink = async (
   uploadResponse: AxiosResponse | undefined,
   token: string | undefined
-) => {
+): Promise<string> => {
   if (!uploadResponse || !token) return '';
   const createLinkUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${uploadResponse.data.id}/createLink`;
   const payload = {

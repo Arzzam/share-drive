@@ -13,7 +13,7 @@ export const graphConfig = {
   driveEndpoint: `https://graph.microsoft.com/v1.0/me/drive/items/root:/`,
 };
 
-export const uploadFileToOneDrive = async (
+export const uploadFilesToOneDrive = async (
   files: IFileInput[],
   token: string,
   filePath: string

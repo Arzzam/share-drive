@@ -9,7 +9,7 @@ import LoadingButton from './LoadingButton';
 import { IFileInput } from '../utils/types';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { uploadFileToOneDrive } from '../api/graphCall';
+import { uploadFilesToOneDrive } from '../api/graphCall';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
@@ -48,7 +48,7 @@ const UploadPage = () => {
     try {
       if (files.length > 0 && token) {
         setIsLoading(true);
-        const response = await uploadFileToOneDrive(files, token, filePath);
+        const response = await uploadFilesToOneDrive(files, token, filePath);
         console.log(response);
         clearFileInputs();
       } else {
