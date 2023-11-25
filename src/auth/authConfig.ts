@@ -1,6 +1,5 @@
 import { LogLevel } from '@azure/msal-browser';
 
-console.log(import.meta.env.VITE_CLIENT_ID);
 export const msalConfig = {
   auth: {
     clientId: import.meta.env.VITE_CLIENT_ID,
