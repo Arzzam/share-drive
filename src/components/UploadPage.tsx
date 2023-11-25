@@ -42,8 +42,16 @@ const UploadPage = () => {
       });
   };
 
+  const getFileFromSessionStorage = () => {
+    const uploadedFiles = sessionStorage.getItem('uploadedFiles');
+    if (uploadedFiles) {
+      setUploadedFiles(JSON.parse(uploadedFiles));
+    }
+  };
+
   useEffect(() => {
     fetchAccessToken();
+    getFileFromSessionStorage();
   }, [accounts]);
 
   const handleUploadFile = async () => {
@@ -51,7 +59,8 @@ const UploadPage = () => {
       if (files.length > 0 && token) {
         setIsLoading(true);
         const response = await uploadFilesToOneDrive(files, token, filePath);
-        setUploadedFiles(response);
+        sessionStorage.setItem('uploadedFiles', JSON.stringify(response));
+        setUploadedFiles((prev) => [...prev, ...response]);
         console.log(response);
         clearFileInputs();
       } else {
@@ -92,11 +101,13 @@ const UploadPage = () => {
           )}
         </div>
       </div>
-      <TableLayout
-        className='w-[80%] mt-10'
-        uploadedFiles={uploadedFiles}
-        setUploadedFiles={setUploadedFiles}
-      />
+      {uploadedFiles.length > 0 && (
+        <TableLayout
+          className='w-[80%] mt-10'
+          uploadedFiles={uploadedFiles}
+          setUploadedFiles={setUploadedFiles}
+        />
+      )}
     </>
   );
 };

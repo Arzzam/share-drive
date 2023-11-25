@@ -6,7 +6,7 @@ import {
   toastConfig,
 } from '../utils/utils';
 import { toast } from 'react-toastify';
-import { FileType, IFileInput, IUploadLinkResponse } from '../utils/types';
+import { EFileType, IFileInput, IUploadLinkResponse } from '../utils/types';
 
 export const graphConfig = {
   graphMeEndpoint: 'https://graph.microsoft.com/v1.0/me',
@@ -40,7 +40,8 @@ export const uploadFilesToOneDrive = async (
       response.push({
         name: file.name,
         link: fileLink,
-        type: FileType.File,
+        type: EFileType.File,
+        id: fileUploadResponse.data.id,
       });
     }
     const { id: folderId, name: folderName } = await getDriveItemId(
@@ -52,7 +53,8 @@ export const uploadFilesToOneDrive = async (
     response.push({
       name: folderName,
       link: folderLink,
-      type: FileType.Folder,
+      type: EFileType.Folder,
+      id: folderId,
     });
     return response;
   } else {
@@ -64,14 +66,20 @@ const getDriveItemId = async (
   token: string,
   filePath: string
 ): Promise<{ id: string; name: string }> => {
-  const response = await axios.get(filePath, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const { id, name } = response.data;
-  return { id, name };
+  try {
+    const response = await axios.get(filePath, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    const { id, name } = response.data;
+    return { id, name };
+  } catch (error) {
+    console.error(error);
+    toast.error('Error getting drive item id', toastConfig);
+    return Promise.reject(error);
+  }
 };
 
 const uploadLargeFile = async (
@@ -133,14 +141,10 @@ const uploadSmallFile = async (
   }
 };
 
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 15;
+let retries = 0;
 
-const getShareableLink = async (
-  id: string | undefined,
-  token: string
-): Promise<string> => {
-  if (!id || !token) return '';
-  let retries = 0;
+const getShareableLink = async (id: string, token: string): Promise<string> => {
   const createLinkUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${id}/createLink`;
   try {
     const urlResponse = await axios.post(createLinkUrl, linkConfigPayload, {

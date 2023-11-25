@@ -1,4 +1,4 @@
-import { Table, Space, Popconfirm, message } from 'antd';
+import { Table, Space, Popconfirm, message, Button } from 'antd';
 import { CopyOutlined, DeleteOutlined } from '@ant-design/icons';
 import { EFileType, IUploadLinkResponse } from '../utils/types';
 
@@ -34,7 +34,24 @@ const TableLayout = (props: ITableLayoutProps) => {
       key: 'type',
     },
     {
-      title: 'Delete',
+      title: (
+        <div className='flex flex-row gap-2'>
+          Delete
+          <Button size='small'>
+            <Popconfirm
+              title='Are you sure to delete all files?'
+              onConfirm={() => handleClearAll()}
+              okText='Yes'
+              cancelText='No'
+              okButtonProps={{
+                className: 'hover:!bg-blue-800 bg-blue-600 text-white ',
+              }}
+            >
+              Clear All
+            </Popconfirm>
+          </Button>
+        </div>
+      ),
       key: 'delete',
       render: (text: string, record: IUploadLinkResponse) => (
         <Popconfirm
@@ -42,6 +59,9 @@ const TableLayout = (props: ITableLayoutProps) => {
           onConfirm={() => handleDeleteFile(record)}
           okText='Yes'
           cancelText='No'
+          okButtonProps={{
+            className: 'hover:!bg-blue-800 bg-blue-600 text-white ',
+          }}
         >
           <a href='#delete'>
             <DeleteOutlined />
@@ -63,16 +83,27 @@ const TableLayout = (props: ITableLayoutProps) => {
     const updatedFiles = props.uploadedFiles.filter(
       (file) => file.id !== record.id
     );
+    sessionStorage.setItem('uploadedFiles', JSON.stringify(updatedFiles));
     props.setUploadedFiles(updatedFiles);
     message.success('File/Folder deleted successfully');
   };
 
+  const handleClearAll = () => {
+    // Implement logic to clear all uploaded files
+    props.setUploadedFiles([]);
+    sessionStorage.removeItem('uploadedFiles');
+    message.success('All files cleared successfully');
+  };
+
   return (
     <>
-      {/* ... (your existing code) */}
       <Table
         className={`${props.className ? props.className : ''}`}
         columns={columns}
+        pagination={{
+          pageSize: 5,
+          position: ['bottomCenter'],
+        }}
         dataSource={props.uploadedFiles}
         rowKey='id'
       />
