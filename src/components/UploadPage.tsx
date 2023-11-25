@@ -6,10 +6,11 @@ import Button from './Button';
 import Input from './Input';
 import DragAndDrop from './DragDropFile';
 import LoadingButton from './LoadingButton';
-import { IFileInput } from '../utils/types';
+import { IFileInput, IUploadLinkResponse } from '../utils/types';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { uploadFilesToOneDrive } from '../api/graphCall';
+import TableLayout from './Table';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
@@ -17,6 +18,7 @@ const UploadPage = () => {
   const [filePath, setFilePath] = useState<string>('');
   const [token, setToken] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [uploadedFiles, setUploadedFiles] = useState<IUploadLinkResponse[]>([]);
 
   const clearFileInputs = () => {
     setFiles([]);
@@ -49,6 +51,7 @@ const UploadPage = () => {
       if (files.length > 0 && token) {
         setIsLoading(true);
         const response = await uploadFilesToOneDrive(files, token, filePath);
+        setUploadedFiles(response);
         console.log(response);
         clearFileInputs();
       } else {
@@ -89,6 +92,11 @@ const UploadPage = () => {
           )}
         </div>
       </div>
+      <TableLayout
+        className='w-[80%] mt-10'
+        uploadedFiles={uploadedFiles}
+        setUploadedFiles={setUploadedFiles}
+      />
     </>
   );
 };

@@ -11,7 +11,7 @@ export interface IFileInput extends File {
   uid: string;
 }
 
-export enum FileType {
+export enum EFileType {
   File = 'File',
   Folder = 'Folder',
 }
@@ -19,5 +19,6 @@ export enum FileType {
 export interface IUploadLinkResponse {
   name: string;
   link: string;
-  type: FileType.File | FileType.Folder;
+  type: EFileType.File | EFileType.Folder;
+  id: string;
 }
