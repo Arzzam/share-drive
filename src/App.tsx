@@ -7,7 +7,7 @@ import UploadPage from './components/UploadPage';
 
 const App = () => {
   return (
-    <div className='p-10 min-h-screen'>
+    <div className='p-10 min-h-screen max-h-full'>
       <Layout>
         <AuthenticatedTemplate>
           <UploadPage />

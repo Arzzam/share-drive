@@ -18,3 +18,8 @@ body {
   min-height: 400px;
   min-width: 400px;
 }
+
+.ant-upload-list {
+  max-height: 6rem;
+  overflow: auto;
+}

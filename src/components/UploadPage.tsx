@@ -39,6 +39,12 @@ const UploadPage = () => {
         if (response) {
           setToken(response.accessToken);
         }
+      })
+      .catch((error) => {
+        console.log(error);
+        instance.loginPopup(loginRequestScopes).catch((e) => {
+          console.log(e);
+        });
       });
   };
 
@@ -54,14 +60,27 @@ const UploadPage = () => {
     getFileFromSessionStorage();
   }, [accounts]);
 
+  const addToUploadedFiles = (response: IUploadLinkResponse[]) => {
+    const filteredUploadedFiles = response.filter(
+      (newFile) =>
+        !uploadedFiles.some((existingFile) => existingFile.id === newFile.id)
+    );
+    sessionStorage.setItem(
+      'uploadedFiles',
+      JSON.stringify([...uploadedFiles, ...filteredUploadedFiles])
+    );
+    setUploadedFiles((prevUploadedFiles) => [
+      ...prevUploadedFiles,
+      ...filteredUploadedFiles,
+    ]);
+  };
+
   const handleUploadFile = async () => {
     try {
       if (files.length > 0 && token) {
         setIsLoading(true);
         const response = await uploadFilesToOneDrive(files, token, filePath);
-        sessionStorage.setItem('uploadedFiles', JSON.stringify(response));
-        setUploadedFiles((prev) => [...prev, ...response]);
-        console.log(response);
+        addToUploadedFiles(response);
         clearFileInputs();
       } else {
         toast.error('Please select a file to upload');
@@ -81,7 +100,7 @@ const UploadPage = () => {
       </h5>
       <div className='flex flex-row justify-center mt-4 items-center gap-10 w-[80%]'>
         <DragAndDrop
-          className='w-[30%] max-h-[60vh] overflow-auto pr-3'
+          className='w-[30%] first-line:pr-3'
           setFiles={setFiles}
           files={files}
         />
@@ -103,7 +122,7 @@ const UploadPage = () => {
       </div>
       {uploadedFiles.length > 0 && (
         <TableLayout
-          className='w-[80%] mt-10'
+          className='w-[80%] mt-4'
           uploadedFiles={uploadedFiles}
           setUploadedFiles={setUploadedFiles}
         />

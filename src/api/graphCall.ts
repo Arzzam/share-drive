@@ -27,29 +27,28 @@ export const uploadFilesToOneDrive = async (
       const fileEndPoint = `${graphConfig.driveEndpoint}${
         filePath ? filePath + '/' : ''
       }${file.name}:/content`;
-      let fileUploadResponse: AxiosResponse;
+      // let fileUploadResponse: AxiosResponse;
       if (isLargeFile(file.size)) {
-        fileUploadResponse = await uploadLargeFile(file, token, fileEndPoint);
+        await uploadLargeFile(file, token, fileEndPoint);
       } else {
-        fileUploadResponse = await uploadSmallFile(file, token, fileEndPoint);
+        await uploadSmallFile(file, token, fileEndPoint);
       }
-      const fileLink = await getShareableLink(
-        fileUploadResponse.data.id,
-        token
-      );
-      response.push({
-        name: file.name,
-        link: fileLink,
-        type: EFileType.File,
-        id: fileUploadResponse.data.id,
-      });
+      // const fileLink = await getShareableLink(
+      //   fileUploadResponse.data.id,
+      //   token
+      // );
+      // response.push({
+      //   name: file.name,
+      // link: fileLink,
+      //   type: EFileType.File,
+      //   id: fileUploadResponse.data.id,
+      // });
     }
     const { id: folderId, name: folderName } = await getDriveItemId(
       token,
       folderEndPoint
     );
     const folderLink = await getShareableLink(folderId, token);
-    console.log('🚀 ~ file: graphCall.ts:32 ~ folderLink:', folderLink);
     response.push({
       name: folderName,
       link: folderLink,
@@ -152,7 +151,6 @@ const getShareableLink = async (id: string, token: string): Promise<string> => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log('🚀 ~ file: graphCall.ts:32 ~ urlResponse:', urlResponse);
     const shareableLink: string = urlResponse.data.link.webUrl;
     return shareableLink;
   } catch (e) {
@@ -162,15 +160,129 @@ const getShareableLink = async (id: string, token: string): Promise<string> => {
       error.response.status === 429 &&
       retries < MAX_RETRIES
     ) {
-      // Implement exponential backoff
-      const delay = Math.pow(2, retries) * 1000; // 2^retries seconds
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      const retryAfter = parseInt(error.response.headers['retry-after']) || 1;
+      console.log(
+        `Rate limit exceeded. Retrying after ${retryAfter} seconds...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
       retries++;
       return getShareableLink(id, token); // Retry the request
+      // // Implement exponential backoff
+      // const delay = Math.pow(2, retries) * 1000; // 2^retries seconds
+      // await new Promise((resolve) => setTimeout(resolve, delay));
+      // retries++;
+      // return getShareableLink(id, token); // Retry the request
+      return Promise.reject(error);
     } else {
       console.error(error);
       toast.error('Error getting shareable link', toastConfig);
       return Promise.reject(error);
     }
+  }
+};
+
+// const getShareableLink1 = async (
+//   id: string,
+//   token: string,
+//   maxRetries: number = 3
+// ): Promise<string> => {
+//   const createLinkUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${id}/createLink`;
+
+//   let retries = 0;
+
+//   while (retries < maxRetries) {
+//     try {
+//       // Make a POST request to create the sharing link
+//       const urlResponse = await axios.post(createLinkUrl, linkConfigPayload, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'application/json',
+//         },
+//       });
+//       console.log('🚀 ~ file: graphCall.ts:32 ~ urlResponse:', urlResponse);
+//       const shareableLink: string = urlResponse.data.link.webUrl;
+
+//       return shareableLink;
+//     } catch (e) {
+//       // Handle 429 errors by retrying after the specified duration
+//       const error = e as AxiosError;
+//       if (error.response && error.response.status === 429) {
+//         const retryAfter = parseInt(error.response.headers['retry-after']) || 1;
+//         console.log(
+//           `Rate limit exceeded. Retrying after ${retryAfter} seconds...`
+//         );
+//         await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+//         retries++;
+//       }
+//       return Promise.reject(error);
+//     }
+//   }
+//   throw new Error('Max retries reached. Unable to complete the request.');
+// };
+
+//   // If max retries are reached, reject the promise
+//   return Promise.reject(
+//     new Error('Max retries reached. Unable to complete the request.')
+//   );
+// };
+
+const getShareableLinkBatch = async (
+  response: IUploadLinkResponse[],
+  token: string
+): Promise<string[]> => {
+  // Construct the batch request
+  const batchUrl = 'https://graph.microsoft.com/v1.0/$batch';
+
+  // Prepare individual requests for each file ID
+  const requests = response.map((res, index) => {
+    const request = {
+      id: index.toString(), // Unique identifier for the request in the batch
+      method: 'POST',
+      url: `/me/drive/items/${res.id}/createLink`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(linkConfigPayload), // Ensure linkConfigPayload is correctly defined
+    };
+
+    // Validate JSON body
+    try {
+      JSON.parse(request.body);
+      console.log(JSON.parse(request.body));
+    } catch (error) {
+      console.error(`Invalid JSON body for request id : ${index}`);
+      throw error;
+    }
+
+    return request;
+  });
+
+  // Create the batch request payload
+  const batchPayload = {
+    requests: requests,
+  };
+
+  try {
+    // Make a POST request to the batch endpoint
+    const batchResponse = await axios.post(batchUrl, batchPayload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('🚀 ~ file: graphCall.ts:32 ~ batchResponse:', batchResponse);
+
+    // Extract the shareable links from the batch response
+    // const shareableLinks: string[] = batchResponse.data.responses.map(response => response.body.link.webUrl);
+
+    // Return the array of shareable links
+    return [];
+  } catch (e) {
+    // Handle errors by rejecting the promise with the error
+    const error = e as AxiosError;
+    console.error(error);
+    return [];
   }
 };

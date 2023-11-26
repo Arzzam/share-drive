@@ -1,6 +1,7 @@
 import { Table, Space, Popconfirm, message, Button } from 'antd';
 import { CopyOutlined, DeleteOutlined } from '@ant-design/icons';
-import { EFileType, IUploadLinkResponse } from '../utils/types';
+import { IUploadLinkResponse } from '../utils/types';
+import clipboardCopy from 'clipboard-copy';
 
 interface ITableLayoutProps extends React.PropsWithChildren {
   uploadedFiles: IUploadLinkResponse[];
@@ -11,40 +12,45 @@ interface ITableLayoutProps extends React.PropsWithChildren {
 const TableLayout = (props: ITableLayoutProps) => {
   const columns = [
     {
-      title: 'Name',
+      title: 'Folder Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Link',
+      title: 'Folder Link',
       dataIndex: 'link',
       key: 'link',
-      render: (link: string, record: IUploadLinkResponse) => (
+      render: (link: string) => (
         <Space size='middle'>
-          <a href={link} target='_blank' rel='noopener noreferrer'>
-            {record.type === EFileType.Folder ? 'Folder Link' : 'File Link'}
+          <a
+            href={link}
+            className='hover:text-blue-600'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            {link}
           </a>
-          <CopyOutlined onClick={() => handleCopyLink(link)} />
+          {link.length > 0 && (
+            <CopyOutlined
+              className='hover:text-blue-600'
+              onClick={() => handleCopyLink(link)}
+            />
+          )}
         </Space>
       ),
     },
     {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-    },
-    {
       title: (
         <div className='flex flex-row gap-2'>
-          Delete
+          <span>Actions</span>
           <Button size='small'>
             <Popconfirm
-              title='Are you sure to delete all files?'
+              title='Are you sure to clear all links?'
               onConfirm={() => handleClearAll()}
               okText='Yes'
               cancelText='No'
               okButtonProps={{
-                className: 'hover:!bg-blue-800 bg-blue-600 text-white ',
+                className: 'hover:!bg-blue-800 bg-blue-600 text-white',
               }}
             >
               Clear All
@@ -53,9 +59,9 @@ const TableLayout = (props: ITableLayoutProps) => {
         </div>
       ),
       key: 'delete',
-      render: (text: string, record: IUploadLinkResponse) => (
+      render: (record: IUploadLinkResponse) => (
         <Popconfirm
-          title='Are you sure to delete this file/folder?'
+          title='Are you sure to clear this folder link?'
           onConfirm={() => handleDeleteFile(record)}
           okText='Yes'
           cancelText='No'
@@ -64,7 +70,7 @@ const TableLayout = (props: ITableLayoutProps) => {
           }}
         >
           <a href='#delete'>
-            <DeleteOutlined />
+            <DeleteOutlined className='hover:text-blue-600' />
           </a>
         </Popconfirm>
       ),
@@ -72,14 +78,11 @@ const TableLayout = (props: ITableLayoutProps) => {
   ];
 
   const handleCopyLink = (link: string) => {
-    console.log(link);
+    clipboardCopy(link);
     message.success('Link copied to clipboard');
   };
 
   const handleDeleteFile = (record: IUploadLinkResponse) => {
-    // Implement your delete file logic here
-    // You can make an API call to delete the file on the server
-    // Update the state to remove the deleted file from the table
     const updatedFiles = props.uploadedFiles.filter(
       (file) => file.id !== record.id
     );
@@ -89,7 +92,6 @@ const TableLayout = (props: ITableLayoutProps) => {
   };
 
   const handleClearAll = () => {
-    // Implement logic to clear all uploaded files
     props.setUploadedFiles([]);
     sessionStorage.removeItem('uploadedFiles');
     message.success('All files cleared successfully');
