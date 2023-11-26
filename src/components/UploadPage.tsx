@@ -11,6 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { uploadFilesToOneDrive } from '../api/graphCall';
 import TableLayout from './Table';
+import { message } from 'antd';
 
 const UploadPage = () => {
   const { instance, accounts } = useMsal();
@@ -77,13 +78,14 @@ const UploadPage = () => {
 
   const handleUploadFile = async () => {
     try {
-      if (files.length > 0 && token) {
+      if (files.length > 0 && token && filePath) {
         setIsLoading(true);
         const response = await uploadFilesToOneDrive(files, token, filePath);
         addToUploadedFiles(response);
         clearFileInputs();
       } else {
-        toast.error('Please select a file to upload');
+        files.length === 0 && message.error('Please select a file to upload');
+        !filePath && message.error('Please enter a file path');
       }
     } catch (error) {
       toast.error('An error occurred during file upload');
@@ -108,6 +110,7 @@ const UploadPage = () => {
         <div className='w-[30%] flex flex-col gap-2 self-start h-full'>
           <Input
             label='File Path'
+            required
             placeholder='Enter the file Path to upload'
             onChange={(e) => handlePathChange(e)}
           />
