@@ -1,6 +1,7 @@
 import { Table, Space, Popconfirm, message, Button } from 'antd';
 import { CopyOutlined, DeleteOutlined } from '@ant-design/icons';
-import { EFileType, IUploadLinkResponse } from '../utils/types';
+import { IUploadLinkResponse } from '../utils/types';
+import clipboardCopy from 'clipboard-copy';
 
 interface ITableLayoutProps extends React.PropsWithChildren {
   uploadedFiles: IUploadLinkResponse[];
@@ -16,23 +17,28 @@ const TableLayout = (props: ITableLayoutProps) => {
       key: 'name',
     },
     {
-      title: 'Link',
+      title: 'Folder Link',
       dataIndex: 'link',
       key: 'link',
-      render: (link: string, record: IUploadLinkResponse) => (
+      render: (link: string) => (
         <Space size='middle'>
           <a href={link} target='_blank' rel='noopener noreferrer'>
-            {record.type === EFileType.Folder ? 'Folder Link' : 'File Link'}
+            {link}
           </a>
-          <CopyOutlined onClick={() => handleCopyLink(link)} />
+          {link.length > 0 && (
+            <CopyOutlined
+              className='hover:text-blue-600'
+              onClick={() => handleCopyLink(link)}
+            />
+          )}
         </Space>
       ),
     },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-    },
+    // {
+    //   title: 'Type',
+    //   dataIndex: 'type',
+    //   key: 'type',
+    // },
     {
       title: (
         <div className='flex flex-row gap-2'>
@@ -53,7 +59,7 @@ const TableLayout = (props: ITableLayoutProps) => {
         </div>
       ),
       key: 'delete',
-      render: (text: string, record: IUploadLinkResponse) => (
+      render: (record: IUploadLinkResponse) => (
         <Popconfirm
           title='Are you sure to delete this file/folder?'
           onConfirm={() => handleDeleteFile(record)}
@@ -72,7 +78,7 @@ const TableLayout = (props: ITableLayoutProps) => {
   ];
 
   const handleCopyLink = (link: string) => {
-    console.log(link);
+    clipboardCopy(link);
     message.success('Link copied to clipboard');
   };
 

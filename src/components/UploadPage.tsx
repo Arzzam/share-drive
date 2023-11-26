@@ -39,6 +39,12 @@ const UploadPage = () => {
         if (response) {
           setToken(response.accessToken);
         }
+      })
+      .catch((error) => {
+        console.log(error);
+        instance.loginPopup(loginRequestScopes).catch((e) => {
+          console.log(e);
+        });
       });
   };
 
@@ -59,9 +65,11 @@ const UploadPage = () => {
       if (files.length > 0 && token) {
         setIsLoading(true);
         const response = await uploadFilesToOneDrive(files, token, filePath);
-        sessionStorage.setItem('uploadedFiles', JSON.stringify(response));
         setUploadedFiles((prev) => [...prev, ...response]);
-        console.log(response);
+        sessionStorage.setItem(
+          'uploadedFiles',
+          JSON.stringify([...uploadedFiles, ...response])
+        );
         clearFileInputs();
       } else {
         toast.error('Please select a file to upload');
