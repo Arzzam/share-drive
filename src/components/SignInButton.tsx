@@ -14,7 +14,11 @@ const SignInButton: React.FC = () => {
     });
   };
 
-  return <Button onClick={handleSignIn}>Sign In</Button>;
+  return (
+    <Button className='hover:bg-[#0078D4]' onClick={handleSignIn}>
+      Sign In
+    </Button>
+  );
 };
 
 export default SignInButton;

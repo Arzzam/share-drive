@@ -7,7 +7,7 @@ import UploadPage from './components/UploadPage';
 
 const App = () => {
   return (
-    <div className='p-10 min-h-screen max-h-full'>
+    <div className='min-h-screen max-h-screen overflow-auto'>
       <Layout>
         <AuthenticatedTemplate>
           <UploadPage />

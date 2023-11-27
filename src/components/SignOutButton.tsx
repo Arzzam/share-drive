@@ -17,7 +17,11 @@ const SignOutButton: React.FC = () => {
       });
   };
 
-  return <Button onClick={handleSignOut}>Sign Out</Button>;
+  return (
+    <Button className='hover:bg-[#0078D4]' onClick={handleSignOut}>
+      Sign Out
+    </Button>
+  );
 };
 
 export default SignOutButton;

@@ -228,63 +228,63 @@ const getShareableLink = async (id: string, token: string): Promise<string> => {
 //   );
 // };
 
-const getShareableLinkBatch = async (
-  response: IUploadLinkResponse[],
-  token: string
-): Promise<string[]> => {
-  // Construct the batch request
-  const batchUrl = 'https://graph.microsoft.com/v1.0/$batch';
+// const getShareableLinkBatch = async (
+//   response: IUploadLinkResponse[],
+//   token: string
+// ): Promise<string[]> => {
+//   // Construct the batch request
+//   const batchUrl = 'https://graph.microsoft.com/v1.0/$batch';
 
-  // Prepare individual requests for each file ID
-  const requests = response.map((res, index) => {
-    const request = {
-      id: index.toString(), // Unique identifier for the request in the batch
-      method: 'POST',
-      url: `/me/drive/items/${res.id}/createLink`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(linkConfigPayload), // Ensure linkConfigPayload is correctly defined
-    };
+//   // Prepare individual requests for each file ID
+//   const requests = response.map((res, index) => {
+//     const request = {
+//       id: index.toString(), // Unique identifier for the request in the batch
+//       method: 'POST',
+//       url: `/me/drive/items/${res.id}/createLink`,
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(linkConfigPayload), // Ensure linkConfigPayload is correctly defined
+//     };
 
-    // Validate JSON body
-    try {
-      JSON.parse(request.body);
-      console.log(JSON.parse(request.body));
-    } catch (error) {
-      console.error(`Invalid JSON body for request id : ${index}`);
-      throw error;
-    }
+//     // Validate JSON body
+//     try {
+//       JSON.parse(request.body);
+//       console.log(JSON.parse(request.body));
+//     } catch (error) {
+//       console.error(`Invalid JSON body for request id : ${index}`);
+//       throw error;
+//     }
 
-    return request;
-  });
+//     return request;
+//   });
 
-  // Create the batch request payload
-  const batchPayload = {
-    requests: requests,
-  };
+//   // Create the batch request payload
+//   const batchPayload = {
+//     requests: requests,
+//   };
 
-  try {
-    // Make a POST request to the batch endpoint
-    const batchResponse = await axios.post(batchUrl, batchPayload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+//   try {
+//     // Make a POST request to the batch endpoint
+//     const batchResponse = await axios.post(batchUrl, batchPayload, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         'Content-Type': 'application/json',
+//       },
+//     });
 
-    console.log('🚀 ~ file: graphCall.ts:32 ~ batchResponse:', batchResponse);
+//     console.log('🚀 ~ file: graphCall.ts:32 ~ batchResponse:', batchResponse);
 
-    // Extract the shareable links from the batch response
-    // const shareableLinks: string[] = batchResponse.data.responses.map(response => response.body.link.webUrl);
+//     // Extract the shareable links from the batch response
+//     // const shareableLinks: string[] = batchResponse.data.responses.map(response => response.body.link.webUrl);
 
-    // Return the array of shareable links
-    return [];
-  } catch (e) {
-    // Handle errors by rejecting the promise with the error
-    const error = e as AxiosError;
-    console.error(error);
-    return [];
-  }
-};
+//     // Return the array of shareable links
+//     return [];
+//   } catch (e) {
+//     // Handle errors by rejecting the promise with the error
+//     const error = e as AxiosError;
+//     console.error(error);
+//     return [];
+//   }
+// };

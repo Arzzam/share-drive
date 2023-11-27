@@ -10,11 +10,13 @@ const Layout = (props: ILayoutProps) => {
   const isAuthenticated = useIsAuthenticated();
   return (
     <>
-      <nav className='flex flex-row justify-between w-full'>
-        <h1 className='self-center font-semibold text-lg'>Easy Share Drive</h1>
+      <nav className='bg-[#2886de] py-2 px-8 flex flex-row justify-between w-full'>
+        <h1 className='self-center text-white font-semibold text-lg'>
+          Share Drive
+        </h1>
         {isAuthenticated ? <SignOutButton /> : <SignInButton />}
       </nav>
-      <main className='flex flex-col justify-center items-center mt-4 h-full'>
+      <main className='p-8 flex flex-col justify-center items-center h-full'>
         {props.children}
       </main>
     </>

@@ -68,11 +68,11 @@ const UploadPage = () => {
     );
     sessionStorage.setItem(
       'uploadedFiles',
-      JSON.stringify([...uploadedFiles, ...filteredUploadedFiles])
+      JSON.stringify([...filteredUploadedFiles, ...uploadedFiles])
     );
     setUploadedFiles((prevUploadedFiles) => [
-      ...prevUploadedFiles,
       ...filteredUploadedFiles,
+      ...prevUploadedFiles,
     ]);
   };
 
@@ -117,7 +117,10 @@ const UploadPage = () => {
           {isLoading ? (
             <LoadingButton />
           ) : (
-            <Button className='self-center mb-1' onClick={handleUploadFile}>
+            <Button
+              className='self-center mb-1 bg-blue-600 hover:bg-blue-800'
+              onClick={handleUploadFile}
+            >
               Upload a File
             </Button>
           )}
