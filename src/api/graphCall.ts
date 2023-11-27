@@ -26,7 +26,7 @@ export const uploadFilesToOneDrive = async (
     for (const file of files) {
       const fileEndPoint = `${graphConfig.driveEndpoint}${
         filePath ? filePath + '/' : ''
-      }${file.name}:/content`;
+      }${file.name}`;
       // let fileUploadResponse: AxiosResponse;
       if (isLargeFile(file.size)) {
         await uploadLargeFile(file, token, fileEndPoint);
@@ -87,10 +87,11 @@ const uploadLargeFile = async (
   fileEndPoint: string
 ): Promise<AxiosResponse> => {
   try {
-    const sessionResponse = await axios.post(fileEndPoint, null, {
+    const sessionFileEndPoint = `${fileEndPoint}:/createUploadSession`;
+    const sessionResponse = await axios.post(sessionFileEndPoint, null, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': file?.type,
       },
     });
     const uploadUrl = sessionResponse.data.uploadUrl;
@@ -125,7 +126,8 @@ const uploadSmallFile = async (
   fileEndPoint: string
 ): Promise<AxiosResponse> => {
   try {
-    const uploadResponse = await axios.put(fileEndPoint, file, {
+    const uploadFileEndPoint = `${fileEndPoint}:/content`;
+    const uploadResponse = await axios.put(uploadFileEndPoint, file, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': file?.type,
